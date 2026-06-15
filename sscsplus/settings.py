@@ -10,7 +10,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-h)5!nydf0^a11!zxvnigy-kl*i
 
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*.onrender.com','.onrender.com','sscsplus.onrender.com','cknews.nav.bd','*.cknews.nav.bd','sscsplus.cknews.nav.bd','sscsplus.pro.bd','sscsplus.nav.bd']
+ALLOWED_HOSTS = ['localhost','*.onrender.com','.onrender.com','sscsplus.onrender.com','cknews.nav.bd','*.cknews.nav.bd','sscsplus.cknews.nav.bd','sscsplus.pro.bd','sscsplus.nav.bd']
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -25,6 +25,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
     'django.middleware.common.CommonMiddleware',
@@ -85,6 +86,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - SSCS+</title>
+  <link rel="stylesheet" href="https://fonts.maateen.me/solaiman-lipi/font.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'SolaimanLipi',sans-serif;}
+    body{background:#f3f5f7;}
+    .dashboard{width:100%;max-width:430px;margin:auto;min-height:100vh;background:#f3f5f7;padding-bottom:40px;}
+    .topbar{
+      background:linear-gradient(135deg,#0a7a3a,#13a34a);
+      color:white;padding:28px 22px;
+      border-bottom-left-radius:30px;border-bottom-right-radius:30px;
+    }
+    .topbar h2{font-size:1.6rem;margin-bottom:8px;}
+    .topbar p{opacity:0.9;font-size:0.95rem;}
+    .topbar .logout-link{
+      float:right;color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;margin-top:6px;
+    }
+    .topbar .logout-link:hover{color:#fff7b2;}
+    .balance-card{
+      margin:20px;
+      background:linear-gradient(135deg,#0c5b35,#13a34a);
+      color:white;padding:25px;border-radius:25px;
+    }
+    .balance-card h4{font-size:0.95rem;opacity:0.85;margin-bottom:6px;}
+    .balance-card h1{margin-top:6px;font-size:2rem;}
+    .action-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:0 20px;margin-bottom:20px;}
+    .action-btn{
+      border:none;background:white;border-radius:22px;padding:20px 10px;cursor:pointer;
+      box-shadow:0 5px 15px rgba(0,0,0,0.08);transition:0.2s;text-decoration:none;display:block;text-align:center;
+    }
+    .action-btn:active{transform:scale(0.97);}
+    .icon{font-size:34px;margin-bottom:10px;line-height:1;}
+    .action-btn span{color:#0a7a3a;font-weight:bold;font-size:0.95rem;}
+    .section{margin:20px;background:white;border-radius:22px;padding:22px;box-shadow:0 5px 15px rgba(0,0,0,0.08);}
+    .section h3{color:#0a7a3a;margin-bottom:18px;font-size:1.1rem;}
+    .statement-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;font-size:0.9rem;}
+    .statement-item:last-child{border-bottom:none;}
+    .stmt-credit{color:#13a34a;font-weight:bold;}
+    .stmt-debit{color:#dc3545;font-weight:bold;}
+    .info-row{display:flex;justify-content:space-between;margin-bottom:14px;font-size:0.9rem;}
+    .info-row .label{color:#666;}
+    .info-row .value{font-weight:bold;color:#333;}
+    .pending{
+      background:#fff4df;padding:14px;border-radius:14px;margin-bottom:10px;font-size:0.9rem;
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .pending .amt{font-weight:bold;color:#d4880f;}
+    .logo-box{text-align:center;margin-top:30px;}
+    .logo-box img{width:90px;opacity:0.6;}
+    .popup-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.45);
+      display:none;justify-content:center;align-items:center;z-index:999;
+    }
+    .popup-overlay.show{display:flex;}
+    .popup-box{
+      width:90%;max-width:350px;background:white;border-radius:28px;padding:28px 24px;text-align:center;
+    }
+    .popup-box h2{color:#0a7a3a;margin-bottom:18px;}
+    .popup-box p{line-height:1.7;margin-bottom:24px;color:#555;font-size:0.95rem;}
+    .popup-box button{
+      width:100%;height:52px;border:none;border-radius:15px;
+      background:#0a7a3a;color:white;font-size:1rem;cursor:pointer;font-weight:bold;
+    }
+    .view-all-link{display:block;text-align:center;margin-top:14px;color:#0a7a3a;text-decoration:none;font-weight:bold;font-size:0.9rem;}
+    .view-all-link:hover{text-decoration:underline;}
+    .admin-link{display:block;text-align:right;margin-top:10px;color:rgba(255,255,255,0.5);font-size:0.8rem;text-decoration:none;}
+    .admin-link:hover{color:#fff7b2;}
+    .empty-state{text-align:center;color:#999;padding:16px 0;font-size:0.9rem;}
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="topbar">
+      <a href="{% url 'logout' %}" class="logout-link"><i class="fa-solid fa-sign-out-alt"></i> লগআউট</a>
+      <h2>{{ request.user.full_name|default:request.user.username }}</h2>
+      {% if request.user.account_number %}
+      <p>অ্যাকাউন্ট: {{ request.user.account_number }}</p>
+      {% endif %}
+    </div>
+
+    <div class="balance-card">
+      <h4>Available Balance</h4>
+      <h1>{{ balance|floatformat:2 }} টাকা</h1>
+    </div>
+
+    <div class="action-grid">
+      <a href="{% url 'ft' %}" class="action-btn">
+        <div class="icon">💸</div>
+        <span>ফান্ড ট্রান্সফার</span>
+      </a>
+      <button class="action-btn" onclick="showPopup('এডভান্স বেতন','দুঃখিত! আপনি বর্তমানে এডভান্স বেতনের জন্য এলিজিবল নন।')">
+        <div class="icon">💰</div>
+        <span>এডভান্স বেতন</span>
+      </button>
+      <button class="action-btn" onclick="showPopup('মার্চেন্ট পেমেন্ট','বর্তমানে মার্চেন্ট পেমেন্ট সেবা বন্ধ রয়েছে।')">
+        <div class="icon">🏪</div>
+        <span>মার্চেন্ট পেমেন্ট</span>
+      </button>
+      <button class="action-btn" onclick="showPopup('এমপ্লয়ি লোন','দুঃখিত! আপনি লোন পাওয়ার জন্য এলিজিবল না।')">
+        <div class="icon">🏦</div>
+        <span>এমপ্লয়ি লোন</span>
+      </button>
+      <button class="action-btn" onclick="showPopup('পিন পরিবর্তন','* আপনার এমপ্লয়ি মেইল থেকে ChatroKontho@protonmail.com এ চার সংখ্যার একটি পিন সেন্ড করুন। সাবজেক্টে দিন PIN CHANGE । অতঃপর পরিবর্তন হয়ে যাবে অটোমেটিক।')">
+        <div class="icon">🔐</div>
+        <span>পিন পরিবর্তন</span>
+      </button>
+    </div>
+
+    <div class="section">
+      <h3>Mini Statement</h3>
+      {% for t in mini_statement %}
+      <div class="statement-item">
+        <span>{{ t.date|date:"d/m/y" }}</span>
+        <span>{{ t.description|truncatechars:22 }}</span>
+        <span class="{% if t.transaction_type == 'credit' %}stmt-credit{% else %}stmt-debit{% endif %}">
+          {% if t.transaction_type == 'debit' %}-{% endif %}{{ t.amount|floatformat:2 }}
+        </span>
+      </div>
+      {% empty %}
+      <div class="empty-state">কোনো লেনদেন নেই</div>
+      {% endfor %}
+      <a href="{% url 'statement' %}" class="view-all-link">সব লেনদেন দেখুন →</a>
+    </div>
+
+    <div class="section">
+      <h3>Account Info</h3>
+      <div class="info-row"><span class="label">পূর্ণ নাম</span><span class="value">{{ request.user.full_name|default:'—' }}</span></div>
+      <div class="info-row"><span class="label">ইউজারনেম</span><span class="value">{{ request.user.username }}</span></div>
+      <div class="info-row"><span class="label">ইমেইল</span><span class="value">{{ request.user.email|default:'—' }}</span></div>
+      <div class="info-row"><span class="label">অ্যাকাউন্ট নং</span><span class="value">{{ request.user.account_number|default:'—' }}</span></div>
+      <div class="info-row"><span class="label">স্ট্যাটাস</span><span class="value">{{ request.user.get_status_display }}</span></div>
+    </div>
+
+    <div class="section">
+      <h3>Pending Works</h3>
+      {% for t in pending_txns %}
+      <div class="pending">
+        <span>{{ t.description|truncatechars:20 }}</span>
+        <span class="amt">{{ t.amount|floatformat:2 }} টাকা</span>
+      </div>
+      {% empty %}
+      <div class="empty-state">কোনো বাকি কাজ নেই</div>
+      {% endfor %}
+    </div>
+
+    <div class="section">
+      <h3>Debit Info</h3>
+      <div class="info-row">
+        <span class="label">মোট ডেবিট</span>
+        <span class="stmt-debit">{{ total_debit|floatformat:2 }} টাকা</span>
+      </div>
+      <div class="info-row">
+        <span class="label">মোট ক্রেডিট</span>
+        <span class="stmt-credit">{{ total_credit|floatformat:2 }} টাকা</span>
+      </div>
+      <div class="info-row">
+        <span class="label">নেট ব্যালেন্স</span>
+        <span class="value">{{ balance|floatformat:2 }} টাকা</span>
+      </div>
+    </div>
+
+    <div class="logo-box">
+      <img src="https://blogger.googleusercontent.com/img/a/AVvXsEicG_cgujm7pOrW8lAhUU5Li-KJkuFwRWj1ZOC2xGw_LzSss5MhOOBHXFhyE4aJ8hpsoosCWjIY2U8zWJCPmqvNB8J1Ph9T26FUpPflxwDB6cpQOZXpjNeSN6hUjXq-7TnKT2ITAKLUPZjTt27UyYsiEAb6_COOe6pyntJS_sk2-x1JsjUxFuJrzaGKgz8=s140" alt="CKNEWS LOGO">
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="popup">
+    <div class="popup-box">
+      <h2 id="popupTitle"></h2>
+      <p id="popupMessage"></p>
+      <button onclick="closePopup()">ঠিক আছে</button>
+    </div>
+  </div>
+
+  <script>
+    function showPopup(title, message) {
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupMessage').textContent = message;
+      document.getElementById('popup').classList.add('show');
+    }
+    function closePopup() {
+      document.getElementById('popup').classList.remove('show');
+    }
+    document.getElementById('popup').addEventListener('click', function(e) {
+      if (e.target === this) closePopup();
+    });
+  </script>
+  <script src="/static/js/script.js"></script>
+</body>
+</html>

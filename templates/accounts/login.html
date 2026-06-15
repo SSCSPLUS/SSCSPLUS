@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Login - SSCS+</title>
+  <link rel="stylesheet" href="https://fonts.maateen.me/solaiman-lipi/font.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'SolaimanLipi', sans-serif;
+    }
+    body{
+      min-height:100vh;
+      background:
+      linear-gradient(
+        135deg,
+        #0a7a3a,
+        #0f9d58
+      );
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+      position:relative;
+    }
+    .circle{
+      position:absolute;
+      border-radius:50%;
+      background:rgba(255,255,255,0.08);
+      z-index:1;
+    }
+    .circle1{
+      width:220px;
+      height:220px;
+      top:-70px;
+      right:-70px;
+    }
+    .circle2{
+      width:180px;
+      height:180px;
+      bottom:-50px;
+      left:-50px;
+    }
+    .container{
+      width:100%;
+      max-width:420px;
+      padding:25px;
+      position:relative;
+      z-index:10;
+    }
+    .login-card{
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.2);
+      backdrop-filter:blur(14px);
+      border-radius:32px;
+      padding:35px 25px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.15);
+    }
+    .logo{
+      text-align:center;
+      margin-bottom:40px;
+    }
+    .logo img{
+      width:90px;
+      margin-bottom:12px;
+    }
+    .logo h1{
+      color:white;
+      font-size:1.8rem;
+      margin-bottom:8px;
+    }
+    .logo p{
+      color:#e8f5ec;
+      font-size:1rem;
+    }
+    .input-group{
+      margin-bottom:20px;
+    }
+    .input-box{
+      width:100%;
+      height:62px;
+      background:white;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      padding:0 18px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    }
+    .input-box i{
+      color:#0a7a3a;
+      font-size:18px;
+      margin-right:12px;
+    }
+    .input-box input{
+      width:100%;
+      border:none;
+      outline:none;
+      background:none;
+      font-size:1.1rem;
+      color:#333;
+    }
+    .input-box input::placeholder{
+      color:#999;
+    }
+    .options{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:28px;
+      color:white;
+      font-size:0.95rem;
+    }
+    .remember{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .remember input{
+      width:17px;
+      height:17px;
+    }
+    .login-btn{
+      width:100%;
+      height:60px;
+      border:none;
+      border-radius:18px;
+      background:white;
+      color:#0a7a3a;
+      font-size:1.3rem;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+    .login-btn:hover{
+      transform:scale(1.02);
+    }
+    .error-msg{
+      background:rgba(220,53,69,0.2);
+      border:1px solid rgba(220,53,69,0.4);
+      color:#fff;
+      padding:12px 18px;
+      border-radius:18px;
+      margin-bottom:20px;
+      text-align:center;
+      font-size:0.95rem;
+    }
+    .footer{
+      margin-top:28px;
+      text-align:center;
+      color:white;
+    }
+    .footer a{
+      color:#fff7b2;
+      text-decoration:none;
+      font-weight:bold;
+    }
+    .fingerprint{
+      width:75px;
+      height:75px;
+      border-radius:50%;
+      background:white;
+      margin:28px auto 0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-size:30px;
+      color:#0a7a3a;
+      box-shadow:0 5px 15px rgba(0,0,0,0.15);
+    }
+    @media(max-width:480px){
+      .container{ padding:18px; }
+      .login-card{ padding:28px 20px; }
+      .logo h1{ font-size:1.5rem; }
+      .input-box{ height:58px; }
+      .login-btn{ height:58px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="circle circle1"></div>
+  <div class="circle circle2"></div>
+  <div class="container">
+    <div class="login-card">
+      <div class="logo">
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEicG_cgujm7pOrW8lAhUU5Li-KJkuFwRWj1ZOC2xGw_LzSss5MhOOBHXFhyE4aJ8hpsoosCWjIY2U8zWJCPmqvNB8J1Ph9T26FUpPflxwDB6cpQOZXpjNeSN6hUjXq-7TnKT2ITAKLUPZjTt27UyYsiEAb6_COOe6pyntJS_sk2-x1JsjUxFuJrzaGKgz8=s140" alt="Logo">
+        <h1>Secure Salary Credit System (SSCS+)</h1>
+        <p>ছাত্র কন্ঠ পত্রিকা, প্রধান ব্রাঞ্চ ডি.</p>
+      </div>
+      {% if error %}
+      <div class="error-msg">
+        <i class="fa-solid fa-exclamation-circle"></i> {{ error }}
+      </div>
+      {% endif %}
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="input-group">
+          <div class="input-box">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" name="username" id="mobile" placeholder="ইউজারনেম" required>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-box">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" name="password" id="pin" placeholder="পিন" required>
+          </div>
+        </div>
+        <div class="options">
+          <label class="remember">
+            <input type="checkbox" name="remember"> সংরক্ষণ রাখুন
+          </label>
+        </div>
+        <button type="submit" class="login-btn">লগইন করুন</button>
+      </form>
+      <div class="fingerprint">
+        <i class="fa-solid fa-fingerprint"></i>
+      </div>
+      <div class="footer">
+        <a href="#">© ছাত্র কন্ঠ পত্রিকা, বাংলাদেশ</a>
+      </div>
+    </div>
+  </div>
+  <script src="/static/js/script.js"></script>
+</body>
+</html>

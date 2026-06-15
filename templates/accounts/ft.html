@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fund Transfer - SSCS+</title>
+  <link rel="stylesheet" href="https://fonts.maateen.me/solaiman-lipi/font.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'SolaimanLipi', sans-serif;
+    }
+    body{
+      min-height:100vh;
+      background: linear-gradient(135deg, #0a7a3a, #0f9d58);
+      position:relative;
+    }
+    .circle{
+      position:fixed;
+      border-radius:50%;
+      background:rgba(255,255,255,0.05);
+      z-index:0;
+      pointer-events:none;
+    }
+    .circle1{ width:280px; height:280px; top:-80px; right:-80px; }
+    .circle2{ width:200px; height:200px; bottom:-60px; left:-60px; }
+
+    .top-bar{
+      background:rgba(255,255,255,0.12);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,0.2);
+      padding:15px 25px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:relative;
+      z-index:10;
+    }
+    .top-bar h2{ color:white; font-size:1.3rem; }
+    .top-bar .nav-links{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .top-bar .nav-links a{
+      color:#fff7b2;
+      text-decoration:none;
+      font-weight:bold;
+      padding:8px 16px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.1);
+      transition:0.3s;
+      font-size:0.9rem;
+    }
+    .top-bar .nav-links a:hover{ background:rgba(255,255,255,0.2); }
+
+    .ft-container{
+      max-width:900px;
+      margin:30px auto;
+      padding:0 20px;
+      position:relative;
+      z-index:10;
+    }
+    .ft-card{
+      background:rgba(255,255,255,0.12);
+      backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,0.2);
+      border-radius:32px;
+      padding:30px 25px;
+      color:white;
+    }
+    .ft-header{
+      text-align:center;
+      margin-bottom:25px;
+    }
+    .ft-header h3{
+      font-size:1.5rem;
+      margin-bottom:8px;
+    }
+    .ft-header p{
+      opacity:0.8;
+      font-size:0.95rem;
+    }
+    .ft-header i{
+      font-size:3rem;
+      margin-bottom:15px;
+      color:#fff7b2;
+    }
+    .iframe-wrapper{
+      width:100%;
+      border-radius:20px;
+      overflow:hidden;
+      background:rgba(255,255,255,0.05);
+      min-height:600px;
+      position:relative;
+    }
+    .iframe-wrapper iframe{
+      width:100%;
+      min-height:600px;
+      border:none;
+      display:block;
+    }
+    .loading-overlay{
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      bottom:0;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      background:rgba(255,255,255,0.05);
+      border-radius:20px;
+      z-index:1;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity 0.3s;
+    }
+    .loading-overlay.active{
+      opacity:1;
+    }
+    .spinner{
+      width:50px;
+      height:50px;
+      border:4px solid rgba(255,255,255,0.2);
+      border-top-color:white;
+      border-radius:50%;
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+
+    .auth-prompt{
+      text-align:center;
+      padding:60px 20px;
+    }
+    .auth-prompt i{
+      font-size:4rem;
+      color:#fff7b2;
+      margin-bottom:20px;
+    }
+    .auth-prompt h3{
+      font-size:1.5rem;
+      margin-bottom:12px;
+    }
+    .auth-prompt p{
+      opacity:0.8;
+      margin-bottom:25px;
+    }
+    .auth-prompt a{
+      display:inline-block;
+      padding:14px 40px;
+      background:white;
+      color:#0a7a3a;
+      border-radius:18px;
+      text-decoration:none;
+      font-weight:bold;
+      font-size:1.1rem;
+      transition:0.3s;
+    }
+    .auth-prompt a:hover{
+      transform:scale(1.03);
+    }
+
+    .info-bar{
+      display:flex;
+      justify-content:center;
+      gap:30px;
+      margin-top:20px;
+      flex-wrap:wrap;
+    }
+    .info-item{
+      text-align:center;
+      font-size:0.9rem;
+      opacity:0.8;
+    }
+    .info-item i{
+      margin-right:6px;
+    }
+
+    @media(max-width:768px){
+      .top-bar{
+        flex-direction:column;
+        gap:10px;
+        text-align:center;
+      }
+      .ft-card{ padding:20px 15px; }
+      .iframe-wrapper{ min-height:500px; }
+      .iframe-wrapper iframe{ min-height:500px; }
+    }
+    @media(max-width:480px){
+      .ft-card{ border-radius:24px; }
+      .iframe-wrapper{ min-height:450px; border-radius:16px; }
+      .iframe-wrapper iframe{ min-height:450px; }
+      .top-bar .nav-links{ flex-wrap:wrap; justify-content:center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="circle circle1"></div>
+  <div class="circle circle2"></div>
+
+  <div class="top-bar">
+    <h2><i class="fa-solid fa-money-bill-transfer"></i> ফান্ড ট্রান্সফার</h2>
+    <div class="nav-links">
+      <a href="{% url 'dashboard' %}"><i class="fa-solid fa-chart-line"></i> ড্যাশবোর্ড</a>
+      <a href="/admin/"><i class="fa-solid fa-cog"></i> অ্যাডমিন</a>
+      <a href="{% url 'logout' %}"><i class="fa-solid fa-sign-out-alt"></i> লগআউট</a>
+    </div>
+  </div>
+
+  <div class="ft-container">
+    {% if user.is_authenticated %}
+    <div class="ft-card">
+      <div class="ft-header">
+        <i class="fa-solid fa-building-columns"></i>
+        <h3>অনলাইন ফান্ড ট্রান্সফার</h3>
+        <p>নিচের ফর্মটি ব্যবহার করে নিরাপদে ফান্ড ট্রান্সফার করুন</p>
+      </div>
+      <div class="iframe-wrapper" id="iframeWrapper">
+        <div class="loading-overlay" id="loadingOverlay">
+          <div class="spinner"></div>
+        </div>
+        <iframe
+          id="JotFormIFrame-261450656542053"
+          title="Fund Transfer Form"
+          onload="onIframeLoad()"
+          allowtransparency="true"
+          allow="geolocation; microphone; camera; fullscreen; payment"
+          src="https://form.jotform.com/261450656542053"
+          frameborder="0"
+          scrolling="no"
+        >
+        </iframe>
+      </div>
+      <div class="info-bar">
+        <div class="info-item"><i class="fa-solid fa-shield-halved"></i> নিরাপদ লেনদেন</div>
+        <div class="info-item"><i class="fa-solid fa-bolt"></i> তাৎক্ষণিক প্রক্রিয়াকরণ</div>
+        <div class="info-item"><i class="fa-solid fa-headset"></i> ২৪/৭ সাপোর্ট</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="ft-card">
+      <div class="auth-prompt">
+        <i class="fa-solid fa-lock"></i>
+        <h3>লগইন প্রয়োজন</h3>
+        <p>ফান্ড ট্রান্সফার ব্যবহার করতে অনুগ্রহ করে লগইন করুন</p>
+        <a href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket"></i> লগইন করুন</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script src='https://cdn.jotfor.ms/s/umd/latest/for-form-embed-handler.js'></script>
+  <script src="/static/js/script.js"></script>
+  <script>
+    function onIframeLoad() {
+      var overlay = document.getElementById('loadingOverlay');
+      if (overlay) { overlay.classList.remove('active'); }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      var overlay = document.getElementById('loadingOverlay');
+      if (overlay) { overlay.classList.add('active'); }
+      var iframe = document.getElementById('JotFormIFrame-261450656542053');
+      if (iframe) {
+        window.jotformEmbedHandler(
+          "iframe[id='JotFormIFrame-261450656542053']",
+          "https://form.jotform.com/"
+        );
+      }
+    });
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'jotform-embed-height') {
+        var iframe = document.getElementById('JotFormIFrame-261450656542053');
+        if (iframe && e.data.height) {
+          iframe.style.height = e.data.height + 'px';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

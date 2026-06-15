@@ -12,11 +12,11 @@ if not SECRET_KEY:
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', 'localhost')
-ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')]
+#ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', 'localhost')
+ALLOWED_HOSTS = ['*.onrender.com','.onrender.com','sscsplus.onrender.com','cknews.nav.bd','*.cknews.nav.bd','sscsplus.cknews.nav.bd','sscsplus.pro.bd','sscsplus.nav.bd']
 
-CSRF_TRUSTED_ORIGINS_ENV = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS_ENV.split(',') if o.strip()]
+#CSRF_TRUSTED_ORIGINS_ENV = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+#CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS_ENV.split(',') if o.strip()]
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -53,8 +53,8 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-CORS_ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS
+#CORS_ALLOW_ALL_ORIGINS = DEBUG
+#CORS_ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS
 
 ROOT_URLCONF = 'sscsplus.urls'
 
@@ -98,10 +98,10 @@ else:
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    #{'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    #{'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
+    #{'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    #{'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
 LANGUAGE_CODE = 'bn'

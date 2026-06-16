@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncMonth
+from django.http import JsonResponse
 from django.utils import timezone
 from decimal import Decimal
 from .models import Transaction, CustomUser
@@ -97,30 +98,51 @@ def pin_change_view(request):
 
 
 @login_required
+def api_user_lookup(request):
+    username = request.GET.get('username', '').strip()
+    if username:
+        try:
+            user = CustomUser.objects.get(username=username)
+            return JsonResponse({'found': True, 'full_name': user.full_name or ''})
+        except CustomUser.DoesNotExist:
+            pass
+    return JsonResponse({'found': False})
+
+
+@login_required
 def transfer_view(request):
+    is_superuser = request.user.is_superuser
+
     if request.method == 'POST':
         recipient_username = request.POST.get('recipient', '').strip()
         amount_str = request.POST.get('amount')
         pin = request.POST.get('pin')
+        description = request.POST.get('description', '').strip()
 
         if not recipient_username or not amount_str or not pin:
-            return render(request, 'accounts/transfer.html', {'error': 'সব ফিল্ড পূরণ করুন'})
+            ctx = {'error': 'সব ফিল্ড পূরণ করুন', 'is_superuser': is_superuser}
+            return render(request, 'accounts/transfer.html', ctx)
 
         try:
             amount = Decimal(amount_str)
         except Exception:
-            return render(request, 'accounts/transfer.html', {'error': 'অবৈধ পরিমাণ'})
+            ctx = {'error': 'অবৈধ পরিমাণ', 'is_superuser': is_superuser}
+            return render(request, 'accounts/transfer.html', ctx)
 
         if amount <= 0:
-            return render(request, 'accounts/transfer.html', {'error': 'পরিমাণ শূন্যের বেশি হতে হবে'})
+            ctx = {'error': 'পরিমাণ শূন্যের বেশি হতে হবে', 'is_superuser': is_superuser}
+            return render(request, 'accounts/transfer.html', ctx)
 
         try:
             recipient = CustomUser.objects.get(username=recipient_username)
         except CustomUser.DoesNotExist:
-            return render(request, 'accounts/transfer.html', {'error': 'ইউজার খুঁজে পাওয়া যায়নি'})
+            ctx = {'error': 'ইউজার খুঁজে পাওয়া যায়নি', 'is_superuser': is_superuser}
+            return render(request, 'accounts/transfer.html', ctx)
 
         if recipient == request.user:
-            return render(request, 'accounts/transfer.html', {'error': 'নিজের কাছে ট্রান্সফার করা যাবে না'})
+            ctx = {'error': 'নিজের কাছে ট্রান্সফার করা যাবে না', 'is_superuser': is_superuser,
+                   'recipient_full_name': recipient.full_name}
+            return render(request, 'accounts/transfer.html', ctx)
 
         txns = Transaction.objects.filter(user=request.user)
         total_credit = txns.filter(transaction_type='credit').aggregate(total=Sum('amount'))['total'] or 0
@@ -128,18 +150,29 @@ def transfer_view(request):
         balance = total_credit - total_debit
 
         if balance < amount:
-            return render(request, 'accounts/transfer.html', {'error': 'পর্যাপ্ত ব্যালেন্স নেই'})
+            ctx = {'error': 'পর্যাপ্ত ব্যালেন্স নেই', 'is_superuser': is_superuser,
+                   'recipient_full_name': recipient.full_name}
+            return render(request, 'accounts/transfer.html', ctx)
 
         if not request.user.check_password(pin):
-            return render(request, 'accounts/transfer.html', {'error': 'পিন ভুল হয়েছে'})
+            ctx = {'error': 'পিন ভুল হয়েছে', 'is_superuser': is_superuser,
+                   'recipient_full_name': recipient.full_name}
+            return render(request, 'accounts/transfer.html', ctx)
 
         today = timezone.now().date()
+
+        if is_superuser and description:
+            debit_desc = description
+            credit_desc = description
+        else:
+            debit_desc = f'Transfer to {recipient.username}'
+            credit_desc = f'Transfer from {request.user.username}'
 
         Transaction.objects.create(
             user=request.user,
             transaction_type='debit',
             amount=amount,
-            description=f'Transfer to {recipient.username}',
+            description=debit_desc,
             date=today,
             entered_by=request.user,
         )
@@ -147,14 +180,16 @@ def transfer_view(request):
             user=recipient,
             transaction_type='credit',
             amount=amount,
-            description=f'Transfer from {request.user.username}',
+            description=credit_desc,
             date=today,
             entered_by=request.user,
         )
 
-        return render(request, 'accounts/transfer.html', {'success': f'{amount} টাকা {recipient.username} এ ট্রান্সফার করা হয়েছে'})
+        ctx = {'success': f'{amount} টাকা {recipient.username} এ ট্রান্সফার করা হয়েছে',
+               'is_superuser': is_superuser, 'recipient_full_name': recipient.full_name}
+        return render(request, 'accounts/transfer.html', ctx)
 
-    return render(request, 'accounts/transfer.html')
+    return render(request, 'accounts/transfer.html', {'is_superuser': is_superuser})
 
 
 @staff_member_required

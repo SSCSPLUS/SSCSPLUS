@@ -88,13 +88,22 @@
       <form method="POST">
         {% csrf_token %}
         <div class="form-group">
-          <label><i class="fa-solid fa-user"></i> প্রাপকের ইউজারনেম</label>
-          <input type="text" name="recipient" placeholder="যাকে ট্রান্সফার করবেন তার ইউজারনেম" required>
+          <label><i class="fa-solid fa-user"></i> প্রাপকের ইউজার আইডি </label>
+          <input type="text" name="recipient" id="recipient-input" placeholder="যাকে ট্রান্সফার করবেন তার ইউজারনেম" required>
+          <div id="recipient-name" style="margin-top:6px;font-size:0.95rem;font-weight:bold;color:#fff7b2;">
+            {% if recipient_full_name %}{{ recipient_full_name }}{% endif %}
+          </div>
         </div>
         <div class="form-group">
           <label><i class="fa-solid fa-coins"></i> পরিমাণ (টাকা)</label>
           <input type="number" name="amount" placeholder="কত টাকা ট্রান্সফার করবেন" step="0.01" min="0.01" required>
         </div>
+        {% if is_superuser %}
+        <div class="form-group">
+          <label><i class="fa-solid fa-pen"></i> বিবরণ (Description)</label>
+          <input type="text" name="description" placeholder="ট্রান্সফারের বিবরণ লিখুন">
+        </div>
+        {% endif %}
         <div class="form-group">
           <label><i class="fa-solid fa-lock"></i> আপনার পিন</label>
           <input type="password" name="pin" placeholder="নিশ্চিত করতে আপনার পিন দিন" required>
@@ -103,5 +112,38 @@
       </form>
     </div>
   </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var input = document.getElementById('recipient-input');
+  var nameDisplay = document.getElementById('recipient-name');
+  var lookupUrl = '{% url "api_user_lookup" %}';
+
+  var debounceTimer;
+  input.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    var username = input.value.trim();
+    if (username.length === 0) {
+      nameDisplay.textContent = '';
+      return;
+    }
+    debounceTimer = setTimeout(function() {
+      fetch(lookupUrl + '?username=' + encodeURIComponent(username), {
+        headers: {'X-Requested-With': 'XMLHttpRequest'}
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.found && data.full_name) {
+          nameDisplay.textContent = data.full_name;
+        } else if (data.found && !data.full_name) {
+          nameDisplay.textContent = '(নাম দেওয়া নেই)';
+        } else {
+          nameDisplay.textContent = '';
+        }
+      })
+      .catch(function() {});
+    }, 300);
+  });
+});
+</script>
 </body>
 </html>

@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from decimal import Decimal
 from .models import Transaction, CustomUser
 
 
@@ -68,6 +70,91 @@ def statement_view(request):
 @login_required
 def ft_view(request):
     return render(request, 'accounts/ft.html')
+
+
+@login_required
+def pin_change_view(request):
+    if request.method == 'POST':
+        old_pin = request.POST.get('old_pin')
+        new_pin = request.POST.get('new_pin')
+        confirm_pin = request.POST.get('confirm_pin')
+
+        if not old_pin or not new_pin or not confirm_pin:
+            return render(request, 'accounts/pin_change.html', {'error': 'সব ফিল্ড পূরণ করুন'})
+        if not request.user.check_password(old_pin):
+            return render(request, 'accounts/pin_change.html', {'error': 'পুরনো পিন ভুল হয়েছে'})
+        if new_pin != confirm_pin:
+            return render(request, 'accounts/pin_change.html', {'error': 'নতুন পিন এবং কনফার্ম পিন মিলে না'})
+        if len(new_pin) < 4:
+            return render(request, 'accounts/pin_change.html', {'error': 'পিন কমপক্ষে ৪ ডিজিটের হতে হবে'})
+
+        request.user.set_password(new_pin)
+        request.user.save()
+        update_session_auth_hash(request, request.user)
+        return render(request, 'accounts/pin_change.html', {'success': 'পিন সফলভাবে পরিবর্তন করা হয়েছে'})
+
+    return render(request, 'accounts/pin_change.html')
+
+
+@login_required
+def transfer_view(request):
+    if request.method == 'POST':
+        recipient_username = request.POST.get('recipient', '').strip()
+        amount_str = request.POST.get('amount')
+        pin = request.POST.get('pin')
+
+        if not recipient_username or not amount_str or not pin:
+            return render(request, 'accounts/transfer.html', {'error': 'সব ফিল্ড পূরণ করুন'})
+
+        try:
+            amount = Decimal(amount_str)
+        except Exception:
+            return render(request, 'accounts/transfer.html', {'error': 'অবৈধ পরিমাণ'})
+
+        if amount <= 0:
+            return render(request, 'accounts/transfer.html', {'error': 'পরিমাণ শূন্যের বেশি হতে হবে'})
+
+        try:
+            recipient = CustomUser.objects.get(username=recipient_username)
+        except CustomUser.DoesNotExist:
+            return render(request, 'accounts/transfer.html', {'error': 'ইউজার খুঁজে পাওয়া যায়নি'})
+
+        if recipient == request.user:
+            return render(request, 'accounts/transfer.html', {'error': 'নিজের কাছে ট্রান্সফার করা যাবে না'})
+
+        txns = Transaction.objects.filter(user=request.user)
+        total_credit = txns.filter(transaction_type='credit').aggregate(total=Sum('amount'))['total'] or 0
+        total_debit = txns.filter(transaction_type='debit').aggregate(total=Sum('amount'))['total'] or 0
+        balance = total_credit - total_debit
+
+        if balance < amount:
+            return render(request, 'accounts/transfer.html', {'error': 'পর্যাপ্ত ব্যালেন্স নেই'})
+
+        if not request.user.check_password(pin):
+            return render(request, 'accounts/transfer.html', {'error': 'পিন ভুল হয়েছে'})
+
+        today = timezone.now().date()
+
+        Transaction.objects.create(
+            user=request.user,
+            transaction_type='debit',
+            amount=amount,
+            description=f'Transfer to {recipient.username}',
+            date=today,
+            entered_by=request.user,
+        )
+        Transaction.objects.create(
+            user=recipient,
+            transaction_type='credit',
+            amount=amount,
+            description=f'Transfer from {request.user.username}',
+            date=today,
+            entered_by=request.user,
+        )
+
+        return render(request, 'accounts/transfer.html', {'success': f'{amount} টাকা {recipient.username} এ ট্রান্সফার করা হয়েছে'})
+
+    return render(request, 'accounts/transfer.html')
 
 
 @staff_member_required

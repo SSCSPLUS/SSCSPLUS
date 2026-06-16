@@ -10,5 +10,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('statement/', views.statement_view, name='statement'),
     path('ft/', views.ft_view, name='ft'),
+    path('pin-change/', views.pin_change_view, name='pin_change'),
+    path('transfer/', views.transfer_view, name='transfer'),
     path('logout/', views.logout_view, name='logout'),
 ]

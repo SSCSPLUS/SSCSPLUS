@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>পিন পরিবর্তন - SSCS+</title>
+  <link rel="stylesheet" href="https://fonts.maateen.me/solaiman-lipi/font.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'SolaimanLipi',sans-serif;}
+    body{min-height:100vh;background:linear-gradient(135deg,#0a7a3a,#0f9d58);position:relative;}
+    .circle{position:fixed;border-radius:50%;background:rgba(255,255,255,0.05);z-index:0;pointer-events:none;}
+    .circle1{width:280px;height:280px;top:-80px;right:-80px;}
+    .circle2{width:200px;height:200px;bottom:-60px;left:-60px;}
+    .top-bar{
+      background:rgba(255,255,255,0.12);backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,0.2);
+      padding:15px 25px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:10;
+    }
+    .top-bar h2{color:white;font-size:1.3rem;}
+    .top-bar .nav-links{display:flex;gap:12px;align-items:center;}
+    .top-bar .nav-links a{
+      color:#fff7b2;text-decoration:none;font-weight:bold;
+      padding:8px 16px;border-radius:12px;background:rgba(255,255,255,0.1);transition:0.3s;font-size:0.9rem;
+    }
+    .top-bar .nav-links a:hover{background:rgba(255,255,255,0.2);}
+    .container{max-width:450px;margin:40px auto;padding:0 20px;position:relative;z-index:10;}
+    .card{
+      background:rgba(255,255,255,0.12);backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,0.2);border-radius:32px;padding:35px 28px;color:white;
+    }
+    .card-header{text-align:center;margin-bottom:28px;}
+    .card-header i{font-size:3rem;color:#fff7b2;margin-bottom:12px;}
+    .card-header h3{font-size:1.5rem;margin-bottom:6px;}
+    .card-header p{opacity:0.8;font-size:0.95rem;}
+    .form-group{margin-bottom:20px;}
+    .form-group label{display:block;margin-bottom:6px;font-weight:bold;font-size:0.9rem;opacity:0.9;}
+    .form-group input{
+      width:100%;padding:14px 18px;border:none;border-radius:16px;
+      background:rgba(255,255,255,0.92);color:#222;font-size:1rem;outline:none;transition:0.3s;
+    }
+    .form-group input:focus{box-shadow:0 0 0 3px rgba(255,255,255,0.3);}
+    .btn{
+      width:100%;padding:16px;border:none;border-radius:16px;
+      background:white;color:#0a7a3a;font-size:1.1rem;font-weight:bold;cursor:pointer;transition:0.3s;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.15);}
+    .alert{
+      padding:14px 18px;border-radius:16px;margin-bottom:22px;font-weight:bold;text-align:center;
+    }
+    .alert-error{background:rgba(220,53,69,0.25);color:#ffb3b3;border-left:4px solid #dc3545;}
+    .alert-success{background:rgba(40,167,69,0.25);color:#a8e6cf;border-left:4px solid #28a745;}
+    @media(max-width:480px){
+      .top-bar{flex-direction:column;gap:10px;text-align:center;}
+      .card{padding:25px 18px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="circle circle1"></div>
+  <div class="circle circle2"></div>
+
+  <div class="top-bar">
+    <h2><i class="fa-solid fa-lock"></i> পিন পরিবর্তন</h2>
+    <div class="nav-links">
+      <a href="{% url 'dashboard' %}"><i class="fa-solid fa-chart-line"></i> ড্যাশবোর্ড</a>
+      <a href="{% url 'logout' %}"><i class="fa-solid fa-sign-out-alt"></i> লগআউট</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa-solid fa-key"></i>
+        <h3>পিন পরিবর্তন করুন</h3>
+        <p>নিরাপত্তার জন্য পুরনো পিন যাচাই করে নতুন পিন সেট করুন</p>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-error">{{ error }}</div>
+      {% endif %}
+      {% if success %}
+      <div class="alert alert-success">{{ success }}</div>
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label><i class="fa-solid fa-key"></i> পুরনো পিন</label>
+          <input type="password" name="old_pin" placeholder="আপনার বর্তমান পিন দিন" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-pen"></i> নতুন পিন</label>
+          <input type="password" name="new_pin" placeholder="নতুন পিন দিন (ন্যূনতম ৪ ডিজিট)" required>
+        </div>
+        <div class="form-group">
+          <label><i class="fa-solid fa-check"></i> নতুন পিন আবার দিন</label>
+          <input type="password" name="confirm_pin" placeholder="নতুন পিন আবার টাইপ করুন" required>
+        </div>
+        <button type="submit" class="btn"><i class="fa-solid fa-save"></i> পিন পরিবর্তন করুন</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

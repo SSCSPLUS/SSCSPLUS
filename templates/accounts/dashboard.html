@@ -104,10 +104,15 @@
         <div class="icon">🏦</div>
         <span>এমপ্লয়ি লোন</span>
       </button>
-      <button class="action-btn" onclick="showPopup('পিন পরিবর্তন','* আপনার এমপ্লয়ি মেইল থেকে ChatroKontho@protonmail.com এ চার সংখ্যার একটি পিন সেন্ড করুন। সাবজেক্টে দিন PIN CHANGE । অতঃপর পরিবর্তন হয়ে যাবে অটোমেটিক।')">
+      <a href="{% url 'pin_change' %}" class="action-btn">
         <div class="icon">🔐</div>
         <span>পিন পরিবর্তন</span>
-      </button>
+      </a>
+
+      <a href="{% url 'transfer' %}" class="action-btn">
+        <div class="icon">🧑‍💼</div>
+        <span>Transfer To Another Account</span>
+      </a>
     </div>
 
     <div class="section">
@@ -135,7 +140,7 @@
       <div class="info-row"><span class="label">স্ট্যাটাস</span><span class="value">{{ request.user.get_status_display }}</span></div>
     </div>
 
-    <div class="section">
+    {% comment %} <div class="section">
       <h3>Pending Works</h3>
       {% for t in pending_txns %}
       <div class="pending">
@@ -145,7 +150,7 @@
       {% empty %}
       <div class="empty-state">কোনো বাকি কাজ নেই</div>
       {% endfor %}
-    </div>
+    </div> {% endcomment %}
 
     <div class="section">
       <h3>Debit Info</h3>

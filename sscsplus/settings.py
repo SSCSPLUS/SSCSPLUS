@@ -13,7 +13,7 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 #ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', 'localhost')
-ALLOWED_HOSTS = ['*.onrender.com','.onrender.com','sscsplus.onrender.com','cknews.nav.bd','*.cknews.nav.bd','sscsplus.pro.bd','sscsplus.nav.bd','www.sscsplus.cknews.nav.bd','www.sscsplus.cknews.nav.bd']
+ALLOWED_HOSTS = ['*.onrender.com','.onrender.com','sscsplus.onrender.com','cknews.nav.bd','*.cknews.nav.bd','sscsplus.pro.bd','sscsplus.nav.bd','www.sscsplus.cknews.nav.bd','www.sscsplus.cknews.nav.bd','sscsplus.dailynationaltimes.com']
 
 #CSRF_TRUSTED_ORIGINS_ENV = os.getenv('CSRF_TRUSTED_ORIGINS', '')
 #CSRF_TRUSTED_ORIGINS = [o.strip() for o in CSRF_TRUSTED_ORIGINS_ENV.split(',') if o.strip()]
